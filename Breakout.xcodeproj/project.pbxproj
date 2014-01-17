@@ -24,6 +24,9 @@
 		6D33BE75188871A800185FC3 /* PaddleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D33BE74188871A800185FC3 /* PaddleView.m */; };
 		6D33BE78188875A400185FC3 /* BallView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D33BE77188875A400185FC3 /* BallView.m */; };
 		6D33BE7B1888867100185FC3 /* BlockView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D33BE7A1888867100185FC3 /* BlockView.m */; };
+		6D4C022A1889D06D0067F00E /* One.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D4C02291889D06D0067F00E /* One.png */; };
+		6D4C022C1889D0710067F00E /* Two.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D4C022B1889D0710067F00E /* Two.png */; };
+		6D4C022E1889D0750067F00E /* Three.png in Resources */ = {isa = PBXBuildFile; fileRef = 6D4C022D1889D0750067F00E /* Three.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +65,9 @@
 		6D33BE77188875A400185FC3 /* BallView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BallView.m; sourceTree = "<group>"; };
 		6D33BE791888867100185FC3 /* BlockView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlockView.h; sourceTree = "<group>"; };
 		6D33BE7A1888867100185FC3 /* BlockView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlockView.m; sourceTree = "<group>"; };
+		6D4C02291889D06D0067F00E /* One.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = One.png; sourceTree = "<group>"; };
+		6D4C022B1889D0710067F00E /* Two.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Two.png; sourceTree = "<group>"; };
+		6D4C022D1889D0750067F00E /* Three.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Three.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +138,7 @@
 				6D33BE74188871A800185FC3 /* PaddleView.m */,
 				6D33BE76188875A400185FC3 /* BallView.h */,
 				6D33BE77188875A400185FC3 /* BallView.m */,
+				6D4C02221889CF0D0067F00E /* Images */,
 				6D33BE561888719C00185FC3 /* Images.xcassets */,
 				6D33BE451888719C00185FC3 /* Supporting Files */,
 			);
@@ -165,6 +172,16 @@
 				6D33BE661888719C00185FC3 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		6D4C02221889CF0D0067F00E /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				6D4C022D1889D0750067F00E /* Three.png */,
+				6D4C022B1889D0710067F00E /* Two.png */,
+				6D4C02291889D06D0067F00E /* One.png */,
+			);
+			name = Images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -243,6 +260,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D4C022E1889D0750067F00E /* Three.png in Resources */,
+				6D4C022A1889D06D0067F00E /* One.png in Resources */,
+				6D4C022C1889D0710067F00E /* Two.png in Resources */,
 				6D33BE571888719C00185FC3 /* Images.xcassets in Resources */,
 				6D33BE491888719C00185FC3 /* InfoPlist.strings in Resources */,
 				6D33BE521888719C00185FC3 /* Main.storyboard in Resources */,
@@ -478,6 +498,7 @@
 				6D33BE6F1888719C00185FC3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		6D33BE701888719C00185FC3 /* Build configuration list for PBXNativeTarget "BreakoutTests" */ = {
 			isa = XCConfigurationList;
@@ -486,6 +507,7 @@
 				6D33BE721888719C00185FC3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

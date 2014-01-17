@@ -9,5 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface BlockView : UIView
+@property int strength;
+@property float startingStrength;
 
 @end

@@ -11,24 +11,27 @@
 #import "BallView.h"
 #import "BlockView.h"
 
-@interface ViewController () <UICollisionBehaviorDelegate>
+@interface ViewController () <UICollisionBehaviorDelegate, UIAlertViewDelegate>
 {
     __weak IBOutlet BallView *ballView;
     __weak IBOutlet PaddleView *paddleView;
+    __weak IBOutlet UIImageView *imageView;
+    __weak IBOutlet UILabel *livesLabel;
+    __weak IBOutlet UILabel *scoreLabel;
     
     UIDynamicAnimator *dynamicAnimator;
     UIPushBehavior *pushBehavior;
     UICollisionBehavior *collisionBehavior;
     UIDynamicItemBehavior *paddleDynamicBehavior;
     UIDynamicItemBehavior *ballDynamicBehavior;
-    UISnapBehavior *snapBehavior;
+    UISnapBehavior *ballSnapBehavior;
+    
     BlockView *block;
     CGRect screenFrame;
-    
-    int columns;
-    NSTimer *ballTimer;
     int timerCounter;
-
+    int columns;
+    int rows;
+    int lives;
 }
 
 @end
@@ -66,7 +69,7 @@
     paddleDynamicBehavior.elasticity = 1.0;
     paddleDynamicBehavior.friction = 0.0;
     paddleDynamicBehavior.resistance = 0.0;
-    paddleDynamicBehavior.density = 10000;
+    paddleDynamicBehavior.density = 1000000;
     
     [dynamicAnimator addBehavior:paddleDynamicBehavior];
     
@@ -83,32 +86,26 @@
     [self loadEasyGame];
     [self randomizeLabelColors];
     [self startTimer];
+    scoreLabel.text = @"0";
 }
 
 -(void)loadEasyGame
 {
-    columns = 8;
+    columns = 10;
+    rows = 3;
+    lives = 2;
+    livesLabel.text = [NSString stringWithFormat:@"%i", lives];
     
-    //Row 1
-    for (int i = 0; i<columns; i++)
+    for (int i = 0; i < rows; i++)
     {
-        block = [BlockView new];
-        block.frame = CGRectMake(i*(screenFrame.size.width/columns),(screenFrame.size.height/12), screenFrame.size.width/columns, screenFrame.size.height/25);
-        [self addBlockAttributesToView];
-    }
-    //Row 2
-    for (int i = 0; i<columns; i++)
-    {
-        block = [BlockView new];
-        block.frame = CGRectMake(i*(screenFrame.size.width/columns),(screenFrame.size.height/12)+screenFrame.size.height/25, screenFrame.size.width/columns, screenFrame.size.height/25);
-        [self addBlockAttributesToView];
-    }
-    //Row 3
-    for (int i = 0; i<columns; i++)
-    {
-        block = [BlockView new];
-        block.frame = CGRectMake(i*(screenFrame.size.width/columns),(screenFrame.size.height/12)+(screenFrame.size.height/25)*2, screenFrame.size.width/columns, screenFrame.size.height/25);
-        [self addBlockAttributesToView];
+        for (int j = 0; j < columns; j++)
+        {
+            block = [BlockView new];
+            block.frame = CGRectMake(j*(screenFrame.size.width/columns),i*(screenFrame.size.height/25)+(screenFrame.size.height/12), screenFrame.size.width/columns, screenFrame.size.height/25);
+            block.strength = arc4random_uniform(3)+1;
+            block.startingStrength = block.strength;
+            [self addBlockAttributesToView];
+        }
     }
 }
 
@@ -135,19 +132,38 @@
     else return NO;
 }
 
-
+-(void)gameOver
+{
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"GAME OVER" message:@"You lose!" delegate:self cancelButtonTitle:@"Play Again" otherButtonTitles: nil];
+        [alert show];
+}
 
 -(void)startTimer
 {
+    imageView.alpha = 1.0;
+    ballView.alpha = 0.0;
+    imageView.image = [UIImage imageNamed:@"Three.png"];
     timerCounter = 3;
-    ballTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(countDownTimer:) userInfo:nil repeats:YES];
+    NSTimer *timer;
+    timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(countDownTimer:) userInfo:nil repeats:YES];
 }
                       
 -(void)countDownTimer:(NSTimer*)timer
 {
     timerCounter --;
+    switch (timerCounter) {
+        case 2:
+            imageView.image = [UIImage imageNamed:@"Two.png"];
+            break;
+        case 1: imageView.image = [UIImage imageNamed:@"One.png"];
+            break;
+        default:
+            imageView.alpha = 0;
+            break;
+    }
     if (timerCounter <=0)
     {
+        imageView.alpha = 0;
         [timer invalidate];
         [self startBallMoving];
     }
@@ -155,7 +171,8 @@
 
 -(void)startBallMoving;
 {
-    [dynamicAnimator removeBehavior:snapBehavior];
+    ballView.alpha = 1.0;
+    [dynamicAnimator removeBehavior:ballSnapBehavior];
     pushBehavior.active = YES;
 }
 
@@ -168,15 +185,28 @@
     }
 }
 
-#pragma mark UICollisionBehaviorDelegate methods
+-(BOOL)prefersStatusBarHidden
+{
+    return YES;
+}
+
+#pragma mark UICollisionBehaviorDelegate
 
 -(void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier atPoint:(CGPoint)p
 {
     if (ballView.center.y >= 550) {
-        snapBehavior = [[UISnapBehavior alloc] initWithItem:ballView snapToPoint:CGPointMake(160, 284)];
-        [dynamicAnimator addBehavior:snapBehavior];
+        lives --;
+        livesLabel.text = [NSString stringWithFormat:@"%i", lives];
+        if (lives == 0)
+        {
+            [self gameOver];
+        } else {
+            [self startTimer];
+        }
+        ballSnapBehavior = [[UISnapBehavior alloc] initWithItem:ballView snapToPoint:CGPointMake(160, 284)];
+        [dynamicAnimator addBehavior:ballSnapBehavior];
         [dynamicAnimator updateItemUsingCurrentState:ballView];
-        [self startTimer];
+        
     }
 }
 
@@ -186,22 +216,40 @@
     
     [self randomizeLabelColors];
     if ([item1 isKindOfClass:[BlockView class]]) {
-        [collisionBehavior removeItem:item1];
+        scoreLabel.text = [NSString stringWithFormat:@"%i", scoreLabel.text.intValue +1];
+        ((BlockView*)item1).strength --;
         [UIView animateWithDuration:.8 animations:^{
-            ((BlockView*)item1).alpha = 0;
+            ((BlockView*)item1).alpha -= 1.0/((BlockView*)item1).startingStrength;
         }];
-        [dynamicAnimator updateItemUsingCurrentState:item1];
+        if (((BlockView*)item1).strength == 0)
+        {
+            [collisionBehavior removeItem:item1];
+            [dynamicAnimator updateItemUsingCurrentState:item1];
+        }
     } else if ([item2 isKindOfClass:[BlockView class]]) {
-        [collisionBehavior removeItem:item2];
-        [dynamicAnimator updateItemUsingCurrentState:item2];
+        scoreLabel.text = [NSString stringWithFormat:@"%i", scoreLabel.text.intValue +1];
+        ((BlockView*)item2).strength --;
         [UIView animateWithDuration:.8 animations:^{
-            ((BlockView*)item2).alpha = 0;
+            ((BlockView*)item2).alpha -= 1.0/((BlockView*)item2).startingStrength;
         }];
+        if (((BlockView*)item2).strength == 0) {
+            [collisionBehavior removeItem:item2];
+            [dynamicAnimator updateItemUsingCurrentState:item2];
+        }
     }
     if ([self shouldStartAgain]==YES) {
         [self startGame];
     }
 }
+
+#pragma mark UIAlertViewDelegate
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    [self startGame];
+}
+
+
 
 
 
