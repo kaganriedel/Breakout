@@ -21,6 +21,7 @@
     UICollisionBehavior *collisionBehavior;
     UIDynamicItemBehavior *paddleDynamicBehavior;
     UIDynamicItemBehavior *ballDynamicBehavior;
+    UISnapBehavior *snapBehavior;
     BlockView *block;
     CGRect screenFrame;
     
@@ -39,7 +40,6 @@
     [super viewDidLoad];
     
     [self startGame];
-    
 }
 
 -(void)startGame
@@ -83,7 +83,6 @@
     [self loadEasyGame];
     [self randomizeLabelColors];
     [self startTimer];
-    
 }
 
 -(void)loadEasyGame
@@ -146,7 +145,6 @@
                       
 -(void)countDownTimer:(NSTimer*)timer
 {
-    NSLog(@"counted down");
     timerCounter --;
     if (timerCounter <=0)
     {
@@ -157,8 +155,8 @@
 
 -(void)startBallMoving;
 {
+    [dynamicAnimator removeBehavior:snapBehavior];
     pushBehavior.active = YES;
-    
 }
 
 -(void)randomizeLabelColors
@@ -175,9 +173,9 @@
 -(void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item withBoundaryIdentifier:(id<NSCopying>)identifier atPoint:(CGPoint)p
 {
     if (ballView.center.y >= 550) {
-        ballView.center = CGPointMake(160, 284);
+        snapBehavior = [[UISnapBehavior alloc] initWithItem:ballView snapToPoint:CGPointMake(160, 284)];
+        [dynamicAnimator addBehavior:snapBehavior];
         [dynamicAnimator updateItemUsingCurrentState:ballView];
-        
         [self startTimer];
     }
 }
@@ -190,7 +188,6 @@
     if ([item1 isKindOfClass:[BlockView class]]) {
         [collisionBehavior removeItem:item1];
         [UIView animateWithDuration:.8 animations:^{
-            
             ((BlockView*)item1).alpha = 0;
         }];
         [dynamicAnimator updateItemUsingCurrentState:item1];
@@ -200,7 +197,6 @@
         [UIView animateWithDuration:.8 animations:^{
             ((BlockView*)item2).alpha = 0;
         }];
-        
     }
     if ([self shouldStartAgain]==YES) {
         [self startGame];
