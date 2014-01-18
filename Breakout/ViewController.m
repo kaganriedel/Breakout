@@ -18,6 +18,7 @@
     __weak IBOutlet UIImageView *imageView;
     __weak IBOutlet UILabel *livesLabel;
     __weak IBOutlet UILabel *scoreLabel;
+    __weak IBOutlet UILabel *highScoreLabel;
     
     UIDynamicAnimator *dynamicAnimator;
     UIPushBehavior *pushBehavior;
@@ -33,6 +34,7 @@
     int rows;
     int lives;
     int level;
+    int highScore;
 }
 
 @end
@@ -144,9 +146,15 @@
 
 -(void)gameOver
 {
-    
+    if ([self shouldSetNewHighScore]) {
+        int oldHighScore = highScore;
+        highScore = scoreLabel.text.intValue;
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"NEW HIGH SCORE" message:[NSString stringWithFormat:@"Old High Score: %i\nNew High Score: %i",oldHighScore,highScore] delegate:self cancelButtonTitle:@"Play Again" otherButtonTitles: nil];
+        [alert show];
+    } else {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"GAME OVER" message:@"You lose!" delegate:self cancelButtonTitle:@"Play Again" otherButtonTitles: nil];
         [alert show];
+    }
 }
 
 -(void)startTimer
@@ -199,6 +207,15 @@
         }
     }
 }
+
+-(BOOL)shouldSetNewHighScore
+{
+    if (scoreLabel.text.intValue > highScore) {
+        return YES;
+    } else
+        return NO;
+}
+
 
 -(BOOL)prefersStatusBarHidden
 {
