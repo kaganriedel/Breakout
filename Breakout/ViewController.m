@@ -32,6 +32,7 @@
     int columns;
     int rows;
     int lives;
+    int level;
 }
 
 @end
@@ -42,11 +43,18 @@
 {
     [super viewDidLoad];
     
+    level = 0;
+    lives = 2;
     [self startGame];
+    
+    
 }
 
 -(void)startGame
 {
+    
+
+    
     screenFrame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width , self.view.frame.size.height);
     dynamicAnimator = [[UIDynamicAnimator alloc] initWithReferenceView:self.view];
     
@@ -83,17 +91,19 @@
     [dynamicAnimator addBehavior:ballDynamicBehavior];
     ballView.center = CGPointMake(160, 284);
     [dynamicAnimator updateItemUsingCurrentState:ballView];
-    [self loadEasyGame];
-    [self randomizeLabelColors];
+    
+    
     [self startTimer];
-    scoreLabel.text = @"0";
+    [self loadGame];
+    [self randomizeLabelColors];
+    
+    
 }
 
--(void)loadEasyGame
+-(void)loadGame
 {
-    columns = 10;
-    rows = 3;
-    lives = 2;
+    columns = 5+level;
+    rows = 1+level;
     livesLabel.text = [NSString stringWithFormat:@"%i", lives];
     
     for (int i = 0; i < rows; i++)
@@ -102,7 +112,7 @@
         {
             block = [BlockView new];
             block.frame = CGRectMake(j*(screenFrame.size.width/columns),i*(screenFrame.size.height/25)+(screenFrame.size.height/12), screenFrame.size.width/columns, screenFrame.size.height/25);
-            block.strength = arc4random_uniform(3)+1;
+            block.strength = arc4random_uniform(level+1)+1;
             block.startingStrength = block.strength;
             [self addBlockAttributesToView];
         }
@@ -134,6 +144,7 @@
 
 -(void)gameOver
 {
+    
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"GAME OVER" message:@"You lose!" delegate:self cancelButtonTitle:@"Play Again" otherButtonTitles: nil];
         [alert show];
 }
@@ -171,6 +182,7 @@
 
 -(void)startBallMoving;
 {
+    [collisionBehavior addItem:ballView];
     ballView.alpha = 1.0;
     [dynamicAnimator removeBehavior:ballSnapBehavior];
     pushBehavior.active = YES;
@@ -179,9 +191,12 @@
 -(void)randomizeLabelColors
 {
     for (UILabel *label in self.view.subviews) {
-        [UIView animateWithDuration:.5 animations:^{
-            label.backgroundColor = [UIColor colorWithHue:(arc4random()%256/256.0) saturation:1 brightness:1 alpha:1];
-        }];
+        if([label isKindOfClass:[BlockView class]] || [label isKindOfClass:[BallView class]])
+        {
+            [UIView animateWithDuration:.5 animations:^{
+                label.backgroundColor = [UIColor colorWithHue:(arc4random()%256/256.0) saturation:1 brightness:1 alpha:1];
+            }];
+        }
     }
 }
 
@@ -205,18 +220,17 @@
         }
         ballSnapBehavior = [[UISnapBehavior alloc] initWithItem:ballView snapToPoint:CGPointMake(160, 284)];
         [dynamicAnimator addBehavior:ballSnapBehavior];
+        [collisionBehavior removeItem:ballView];
         [dynamicAnimator updateItemUsingCurrentState:ballView];
-        
     }
 }
 
 
 -(void)collisionBehavior:(UICollisionBehavior *)behavior beganContactForItem:(id<UIDynamicItem>)item1 withItem:(id<UIDynamicItem>)item2 atPoint:(CGPoint)p
 {
-    
     [self randomizeLabelColors];
     if ([item1 isKindOfClass:[BlockView class]]) {
-        scoreLabel.text = [NSString stringWithFormat:@"%i", scoreLabel.text.intValue +1];
+        scoreLabel.text = [NSString stringWithFormat:@"%i", scoreLabel.text.intValue +10];
         ((BlockView*)item1).strength --;
         [UIView animateWithDuration:.8 animations:^{
             ((BlockView*)item1).alpha -= 1.0/((BlockView*)item1).startingStrength;
@@ -227,7 +241,8 @@
             [dynamicAnimator updateItemUsingCurrentState:item1];
         }
     } else if ([item2 isKindOfClass:[BlockView class]]) {
-        scoreLabel.text = [NSString stringWithFormat:@"%i", scoreLabel.text.intValue +1];
+        
+        scoreLabel.text = [NSString stringWithFormat:@"%i", scoreLabel.text.intValue +10];
         ((BlockView*)item2).strength --;
         [UIView animateWithDuration:.8 animations:^{
             ((BlockView*)item2).alpha -= 1.0/((BlockView*)item2).startingStrength;
@@ -238,6 +253,7 @@
         }
     }
     if ([self shouldStartAgain]==YES) {
+        level ++; //makes the the next level have 1 extra row, 1 extra column and blocks can have 1 greater max strength
         [self startGame];
     }
 }
@@ -246,6 +262,15 @@
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+    scoreLabel.text = @"0";
+    level = 0;
+    lives = 2;
+    for (BlockView * blockView in self.view.subviews) {
+        if ([blockView isKindOfClass:[BlockView class]]){
+        [blockView removeFromSuperview];
+        [collisionBehavior removeItem:blockView];
+        }
+    }
     [self startGame];
 }
 
